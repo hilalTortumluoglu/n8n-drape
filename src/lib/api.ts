@@ -1,7 +1,7 @@
-const WEBHOOK_URL = 'http://localhost:5678/webhook-test/b95de125-30b9-40cd-a83d-b689ae6bbddf';
+const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || '';
 
 export interface GenerateRequest {
-  quey: [string, string];
+  query: [string, string];
   fabric: string;
 }
 
@@ -24,9 +24,29 @@ export async function generateImage(request: GenerateRequest): Promise<string> {
     }
 
     const data = await response.json();
-    return data.imageUrl || data.image_url || data.result;
+
+    // Handle nested array response (n8n style)
+    const result = Array.isArray(data) ? data[0] : data;
+
+    // Try different common image URL locations
+    const imageUrl = result.imageUrl ||
+      result.image_url ||
+      result.result ||
+      (result.images && result.images[0]?.url);
+
+    if (!imageUrl) {
+      console.error('Image URL not found in response:', data);
+      throw new Error('Image URL not found in response');
+    }
+
+    return imageUrl;
   } catch (error) {
-    throw new Error('Generation is taking longer than expected. Please try again.');
+    console.error('n8n Request Error:', error);
+    throw new Error(
+      error instanceof Error
+        ? `Connection Error: ${error.message}`
+        : 'Generation failed. Please check your n8n connection and CORS settings.'
+    );
   }
 }
 

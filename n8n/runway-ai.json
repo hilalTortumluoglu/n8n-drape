@@ -1,0 +1,219 @@
+{
+  "name": "runway-ai",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b95de125-30b9-40cd-a83d-b689ae6bbddf",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        -16
+      ],
+      "id": "ed37530f-8bfb-4df9-8ebf-dfff9ad55a64",
+      "name": "Webhook",
+      "webhookId": "b95de125-30b9-40cd-a83d-b689ae6bbddf"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/flux-2/lora/edit",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 41826d5b-cd72-460f-a85f-d942ca146827:1035e1e06e3cfcf67497944f3a157952"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"Take the clothing design from the @image1 and generate a realistic version of it, then place this clothing realistically on the model in the @image2.\",\n  \"image_urls\": [\n    \"{{$json[\"body\"][\"query\"][0]}}\",\n    \"{{$json[\"body\"][\"query\"][1]}}\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "eb13ed17-6168-4759-985e-254b5f54b061",
+      "name": "post-fal.ai"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "52b8f27b-ce53-4277-bf1f-f55f48f84f2d",
+      "name": "Wait",
+      "webhookId": "caee5771-a0fc-4ed2-bee0-afd3ecccfced"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b8d8dd41-5b84-463b-bd52-7bb1f4b0b98f",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "69860251-ff77-429f-a313-dfd8a9ae1f17",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/flux-2/requests/{{ $json.request_id }}/status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 41826d5b-cd72-460f-a85f-d942ca146827:1035e1e06e3cfcf67497944f3a157952"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "41ca7611-7dbf-4e2f-aa8f-cb1b042d47e4",
+      "name": "status"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/flux-2/requests/{{ $json.request_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 41826d5b-cd72-460f-a85f-d942ca146827:1035e1e06e3cfcf67497944f3a157952"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        768,
+        -32
+      ],
+      "id": "27b52f91-d911-47e9-8151-8a86191e6754",
+      "name": "result"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "post-fal.ai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "post-fal.ai": {
+      "main": [
+        [
+          {
+            "node": "status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "status": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "7d85acec-97cf-490a-a25f-3be7029e2372",
+  "meta": {
+    "instanceId": "641d0c8c15d528cb2a66255017380b118ca0a62f126b16b3b27e99dc482aaf84"
+  },
+  "id": "rbGdrb8KpbNtEwUq",
+  "tags": []
+}

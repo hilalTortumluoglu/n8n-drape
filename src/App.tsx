@@ -4,6 +4,7 @@ import Studio from './pages/Studio';
 import Pricing from './pages/Pricing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import TestConnection from './pages/TestConnection';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/test" element={<TestConnection />} />
       </Routes>
     </Router>
   );
