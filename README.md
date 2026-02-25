@@ -4,17 +4,8 @@
 
 ## 📺 Demo
 
-<!-- 
-HOW TO ADD YOUR VIDEO:
-1. Push your project to GitHub.
-2. Open a GitHub Issue or PR in your repo.
-3. Drop your mp4/mov file into the comment box.
-4. Copy the generated link (starts with https://github.com/user/project/assets/...)
-5. Paste that link into the 'src' attribute of the <video> tag below.
--->
-
 <div align="center">
-  <video src="YOUR_DIRECT_GITHUB_VIDEO_URL_HERE" width="100%" controls autoplay muted loop>
+  <video src="https://github.com/user-attachments/assets/4a2c7a62-7a2f-410a-82df-2f1e02e25df3" width="100%" controls autoplay muted loop>
     Your browser does not support the video tag.
   </video>
 </div>
